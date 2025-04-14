@@ -3,7 +3,7 @@ const path = require ('path'); //Para trabajar con rutas de forma segura.
 const pathProductos= path.join(__dirname, 'products.json'); //Ruta absoluta
 
 
-//CREAR CLASE PRODUCTMANAGER E INTEGRARLE TODOS LOS METODOS (FUNCIONES)
+//CREAR CLASE PRODUCTMANAGER E INTEGRARLE TODOS LOS METODOS (CRUD)
 
 
 
@@ -21,7 +21,7 @@ function getProductById(pid) {
 
 function addProduct(product) {
 
-    //La funcion crea un nuevo producto y lo agrega al final de la lista
+    //La funcion crea un nuevo producto y lo agrega al final de la lista de productos
     const productos = getProducts();
     productos.push(product);
     fs.writeFileSync(pathProductos, JSON.stringify(productos));
@@ -29,7 +29,7 @@ function addProduct(product) {
 
 function updateProduct(pid, updated) {
 
-    //La funcion actualiza un producto existente en la lista cuyo id sea igual al 1er argumento dado y le otorga la informacion nueva del 2do argumento dado.
+    //La funcion actualiza un producto existente en la lista cuyo id sea igual al 1er argumento dado y lo reemplaza por un objeto nuevo en el 2do argumento dado.
     const productos = getProducts();
     productos[pid - 1] = updated;
     fs.writeFileSync(pathProductos, JSON.stringify(productos));
