@@ -10,14 +10,12 @@ class CartManager{
 
             fs.promises.writeFile(pathCarritos, JSON.stringify([]));
         }
-
         //Guardar la instancia de ProductManager para usar el metodo de getProductById()
         this.productManager = productManager;
     }
 
     async getCarts(){
         //La funcion retorna un listado de carritos
-
         const carritos = await fs.promises.readFile(pathCarritos, 'utf-8');
         return JSON.parse(carritos);
     }
@@ -63,8 +61,10 @@ class CartManager{
         }
 
 
-        carrito.products = carrito.products || [];
         carrito.products.push(producto);
+
+        const carritoIndex = listaCarritos.findIndex(c=> c.id ===cid)
+        listaCarritos[carritoIndex] = carrito;
     
         await fs.promises.writeFile(pathCarritos, JSON.stringify(listaCarritos, null, 2));
 
