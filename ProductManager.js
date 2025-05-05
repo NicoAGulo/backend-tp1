@@ -30,15 +30,19 @@ class ProductManager{
         //La funcion crea un nuevo producto y lo agrega al final de la lista de productos
         const productos = await this.getProducts();
         productos.push(product);
-        fs.promises.writeFile(pathProductos, JSON.stringify(productos));
+        fs.promises.writeFile(pathProductos, JSON.stringify(productos, null, 2));
     }
     
     async updateProduct(pid, updated) {
         //La funcion actualiza un producto existente en la lista cuyo id sea igual al 1er argumento dado y lo reemplaza por un objeto nuevo en el 2do argumento dado.
         const productos = await this.getProducts();
-        productos[pid - 1] = updated
 
-        fs.promises.writeFile(pathProductos, JSON.stringify(productos));
+        const index = productos.findIndex(producto=> producto.id ===pid);
+
+
+        productos[index] = {...productos[index], ...updated}
+
+        await fs.promises.writeFile(pathProductos, JSON.stringify(productos, null, 2));
     }
     
     async deleteProduct(pid) {
@@ -46,7 +50,7 @@ class ProductManager{
         let productos = await this.getProducts();
         productos = productos.filter(product => product.id !== pid);
 
-        fs.promises.writeFile(pathProductos, JSON.stringify(productos));
+        fs.promises.writeFile(pathProductos, JSON.stringify(productos, null, 2));
     }
 }
 
