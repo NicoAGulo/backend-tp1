@@ -6,6 +6,7 @@ const PORT = 3000;
 // const path = require ('path');
 // const pathProductos= path.join(__dirname, 'products.json')
 
+
 const ProductManager = require('./ProductManager.js')
 const productManager = new ProductManager();
 
