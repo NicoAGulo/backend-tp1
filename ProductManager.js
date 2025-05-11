@@ -1,5 +1,6 @@
-const fs = require('fs'); //Para permitir el CRUD mediante sistema de archivos.
-const path = require ('path'); //Para trabajar con rutas de forma segura.
+import fs from 'node:fs'
+import * as path from "path"
+import __dirname from "./src/utils.js"
 const pathProductos= path.join(__dirname, 'products.json'); //Ruta absoluta
 
 
@@ -54,4 +55,4 @@ class ProductManager{
     }
 }
 
-module.exports = ProductManager;
+export default ProductManager

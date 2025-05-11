@@ -20,18 +20,18 @@ const products= multer({dest: 'products/'});
 
 //POST PARA AGREGAR PRODUCTO AL ARRAY DE PRODUCTOS DESDE CLIENTE
 //Estructura POST de un solo archivo llamado imagenPerfil que llama a funcion saveImage para editar el nombre del archivo al guardarse.
-app.post('/images/single', upload.single('imagenPerfil'), (req, res)=>{
-    console.log(req.file);
-    saveImage(req.file);
-    res.send('Termina')
-})
+// app.post('/images/single', upload.single('imagenPerfil'), (req, res)=>{
+//     console.log(req.file);
+//     saveImage(req.file);
+//     res.send('Termina')
+// })
 
-//SOSTENIBLE POR FS Y LOCALSTORAGE
-function saveImage(file){
-    const newPath =`./uploads/${file.originalname}`
-    fs.renameSync(file.path, newPath);
-    return newPath
-}
+// //SOSTENIBLE POR FS Y LOCALSTORAGE
+// function saveImage(file){
+//     const newPath =`./uploads/${file.originalname}`
+//     fs.renameSync(file.path, newPath);
+//     return newPath
+// }
 
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars")

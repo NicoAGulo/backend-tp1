@@ -1,5 +1,6 @@
-const fs = require('fs'); //Para permitir el CRUD mediante sistema de archivos.
-const path = require ('path'); //Para trabajar con rutas de forma segura.
+import fs from 'node:fs'
+import * as path from "path"
+import __dirname from "./src/utils.js"
 const pathCarritos= path.join(__dirname, 'carts.json'); //Ruta absoluta
 
 //CREAR CLASE CARTMANAGER E INTEGRARLE TODOS LOS METODOS(FUNCIONES):
@@ -116,4 +117,4 @@ class CartManager{
 
 }
 
-module.exports= CartManager;
+export default CartManager
