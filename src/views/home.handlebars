@@ -2,6 +2,10 @@
 <h2>Lista de productos agregados hasta el momento:</h2>
 
 {{#if products.length}}
+
+    {{!-- Si el producto que sigue ESTA en la lista entonces agregar al contador de ese producto +1 --}}
+
+    {{!-- Si el producto que sigue no esta en la lista entonces renderizarlo --}}
     {{#each products}}
         <div class="cart-product">
             <div>
@@ -19,9 +23,14 @@
             </div>
 
             <h3>PRECIO: {{this.price}}</h3>
+            <h4>Cantidad:{{this.quantity}}</h4>
 
-            <form action="/cart/{{../carritoId}}/add_product/{{this.id}}" method="POST">
+            <form action="/vistas/cart/{{../carritoId}}/add_product/{{this.id}}" method="POST">
                 <button type="submit">+</button>
+            </form>
+
+            <form action="/vistas/cart/{{../carritoId}}/delete_product/{{this.id}}" method="POST">
+                <button type="submit">-</button>
             </form>
         </div>
 
