@@ -47,4 +47,15 @@ router.delete("cart/:cid/delete_product/:pid", async (req, res)=>{
     }
 })
 
+router.get("/realTimeProducts", async (req, res)=>{
+    try{
+        const productos= await productManager.getProducts();
+        res.render("partials/realTimeProducts", {productos})
+    }catch(error){
+        console.error("Error al cargar la lista de productos disponibles", error);
+        res.status(500).send("Error al cargar los productos disponibles")
+    }
+
+})
+
 export default router;

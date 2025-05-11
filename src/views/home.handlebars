@@ -3,26 +3,27 @@
 
 {{#if products.length}}
     {{#each products}}
-    
-        <div>
-            <h6>Categoria: {{this.category}}</h6>
+        <div class="cart-product">
+            <div>
+                <h6>Categoria: {{this.category}}</h6>
+            </div>
+
+            <div>
+                <span>ID: {{this.id}}</span>
+                <h2>TITULO :{{this.title}}</h2>
+            </div>
+
+            <div>
+                <p>Descripcion: {{this.description}}</p>
+                <p>codigo: {{this.code}}</p>
+            </div>
+
+            <h3>PRECIO: {{this.price}}</h3>
+
+            <form action="/cart/{{../carritoId}}/add_product/{{this.id}}" method="POST">
+                <button type="submit">+</button>
+            </form>
         </div>
-
-        <div>
-            <span>ID: {{this.id}}</span>
-            <h2>TITULO :{{this.title}}</h2>
-        </div>
-
-        <div>
-            <p>Descripcion: {{this.description}}</p>
-            <p>codigo: {{this.code}}</p>
-        </div>
-
-        <h3>PRECIO: {{this.price}}</h3>
-
-        <form action="/cart/{{../carritoId}}/add_product/{{this.id}}" method="POST">
-            <button type="submit">+</button>
-        </form>
 
         {{!-- BOTON DE AGREGAR OTRO PRODUCTO IGUAL AL CARRITO --}}
         {{!-- BOTON DE QUITAR PRODUCTO DEL CARRITO | SI no hay productos de este tipo en carrito no aparece--}}
