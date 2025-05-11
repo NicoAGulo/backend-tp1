@@ -3,32 +3,29 @@ const CartManager = require('./CartManager.js')
 
 
 
-// async function main(){
-//     //Se crea una instancia de cada clase para gestionar productos y carritos.
-//     const productManager= new ProductManager();
-//     const cartManager= new CartManager(productManager);
+async function main(){
+    //Se crea una instancia de cada clase para gestionar productos y carritos.
+    const productManager= new ProductManager();
+    const cartManager= new CartManager(productManager);
 
 
-//     //METODOS DE CARRITO:
+//METODOS DE CARRITO:
 
-//     //Metodo para crear un nuevo carrito: createCart()
-//     await cartManager.createCart();
 
+//BOTON PARA VISUALIZAR CARRITOS (CARTS_GET)
 //     //Metodo para verificar carritos existentes: getCarts()
 //     const detalleCarrito= await cartManager.getCarts();
 //     console.log("Listado de carritos:");
 //     console.log(detalleCarrito);
 
-//     //Metodo para verificar el listado de productos agregados al carrito elegido por su id: getCartById(carritoAVerificar)
+    //CREAR NUEVA INSTANCIA: (POST DEL SERVER)
+    const cart = await cartManager.createCart();
+    //Metodo para crear un nuevo carrito: createCart()
 
-//     const carritoAVerificar1 = await cartManager.getCartById(1)
-//     const carritoAVerificar2 = await cartManager.getCartById(2)
-//     console.log("Se verifica el carrito con ID 1");
-//     console.log(carritoAVerificar1);
-//     console.log("Se verifica el carrito con ID 2");
-//     console.log(carritoAVerificar2);
+    //METODO GET A CARRITO
     
-//     //Metodo para agregar un producto al carrito: addProductToCart(cid, pid)
+    
+//     //Metodo para agregar un producto al carrito: addProductToCart(cid, pid) ADD_ITEM
 //     await cartManager.addProductToCart(2,2);
 
 
@@ -36,15 +33,15 @@ const CartManager = require('./CartManager.js')
 
 //     //METODOS DE PRODUCTOS
 
-//     //Metodo de listado de productos
+//     //Metodo de listado de productos (ITEM_LIST)
 //     const productosDisponibles = await productManager.getProducts();
 //     console.log(productosDisponibles)
 
-//     //Metodo de verificacion de producto con id X
+//     //Metodo de verificacion de producto con id X (ITEM_STOCK)
 //     const productoDisponible = await productManager.getProductById(3);
 //     console.log(productoDisponible)
 
-//     //Metodo para agregar producto al listado de productos
+//     //Metodo para agregar producto al listado de productos (NEW_ITEM)
 //     const productoNuevo = {
 //         "id": 99,
 //         "title": "Producto Nuevo Agregado",
@@ -59,7 +56,7 @@ const CartManager = require('./CartManager.js')
 //     await productManager.addProduct(productoNuevo);
 
 //     //Metodo para editar un producto de la lista
-//     const productoOriginal= await productManager.getProductById(99);
+//     const productoOriginal= await productManager.getProductById(99); (ITEM_PUT)
 //     const productoEditado={
 //         ...productoOriginal,
 //         title: "PRODUCTO NUEVO EDITADO",
@@ -69,7 +66,7 @@ const CartManager = require('./CartManager.js')
 //     console.log("Producto con ID:99 Editado")
 
 
-//     //Metodo para eliminar un producto de la lista de productos:
+//     //Metodo para eliminar un producto de la lista de productos: (ITEM_DELETE)
 //     await productManager.deleteProduct(99);
 //     console.log("Producto con ID:99 eliminado de la lista de productos.")
 
@@ -77,3 +74,5 @@ const CartManager = require('./CartManager.js')
 // }
 
 // main();
+
+}

@@ -25,7 +25,15 @@ class CartManager{
         const carritos = await this.getCarts();
         return carritos.find(carrito => carrito.id ===cid)||null;
     }
-    
+
+    async getCart(){
+        //La funcion retorna la ultima instancia del carrito creado.
+        const carritos = await this.getCarts();
+        return carritos.length > 0 ? carritos[carritos.length - 1] : null;
+
+
+    }
+
     async createCart(){
         //La funcion crea un nuevo carrito y lo agrega al final de la lista
     
@@ -44,7 +52,7 @@ class CartManager{
     }
     
     async addProductToCart(cid, pid){
-        //La funcion agrega al final de la lista del carrito cuyo id sea igual al 1er argumento el producto cuyo id sea igual al 2do argumento
+        //La funcion agrega producto con id *pid* al final de la lista del carrito con id *cid*
         
         const listaCarritos= await this.getCarts();
         const carrito= await this.getCartById(cid);
@@ -70,6 +78,41 @@ class CartManager{
 
         console.log(`Producto con ID ${pid} agregado al carrito con ID ${cid}.`);
     }
+
+    async removeProductFromCart(cid, pid) {
+    // Obtener la lista de carritos
+    const listaCarritos = await this.getCarts();
+    const carrito = await this.getCartById(cid);
+
+    // Validar si el carrito existe
+    if (!carrito) {
+        console.error(`Carrito con id ${cid} no encontrado.`);
+        return;
+    }
+
+    // Buscar el índice del producto en el carrito
+    const productIndex = carrito.products.findIndex(producto => producto.id === pid);
+
+    // Validar si el producto existe en el carrito
+    if (productIndex === -1) {
+        console.error(`Producto con id ${pid} no encontrado en el carrito con id ${cid}.`);
+        return;
+    }
+
+    // Eliminar el producto del carrito
+    carrito.products.splice(productIndex, 1);
+
+    // Actualizar el carrito en la lista general
+    const carritoIndex = listaCarritos.findIndex(c => c.id === cid);
+    listaCarritos[carritoIndex] = carrito;
+
+    // Guardar los cambios en el archivo
+    await fs.promises.writeFile(pathCarritos, JSON.stringify(listaCarritos, null, 2));
+
+    console.log(`Producto con ID ${pid} eliminado del carrito con ID ${cid}.`);
+}
+
+
 
 }
 

@@ -1,0 +1,34 @@
+{{!-- ACA SE VISUALIZAN TODOS LOS ARCHIVOS DE PRODUCTS.JSON 
+    *CADA PRODUCTO DEBE CONTAR CON UN BOTON PARA SER ELIMINADO
+    *TAMBIEN HAY UN FORMULARIO PARA CREAR PRODUCTOS NUEVOS
+    
+    TANTO AL ELIMINAR COMO AL CREAR SE ACTUALIZA AUTOMATICAMENTE CON WEBSOCKET
+    EL SOCKET DE SV SE UTILIZA ProductManager.js para gestion de productos.
+--}}
+
+
+<h1>PRODUCTOS</h1>
+<h2>Listado de productos disponibles</h2>
+
+{{#each products}}
+    
+    <div>
+        <h6>{{this.category}}</h6>
+    </div>
+
+    <div>
+        <span>{{this.id}}</span>
+        <h2>{{this.title}}</h2>
+    </div>
+    
+    <div>
+        <p>{{this.description}}</p>
+        <p>{{this.code}}</p>
+    </div>
+
+    <h3>{{this.price}}</h3>
+
+    {{!-- BOTON DE AGREGAR OTRO PRODUCTO IGUAL AL CARRITO --}}
+    {{!-- BOTON DE QUITAR PRODUCTO DEL CARRITO | SI no hay productos de este tipo en carrito este boton no aparece--}}
+    {{!-- CANTIDAD DE PRODUCTOS SIMILARES A ESTE EN CARRITO | Si es 0 no aparece --}}
+{{/each}}
