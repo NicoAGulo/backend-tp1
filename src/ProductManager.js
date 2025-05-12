@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import * as path from "path"
-import __dirname from "./src/utils.js"
+import __dirname from "./utils.js"
 const pathProductos= path.join(__dirname, 'products.json'); //Ruta absoluta
 
 
@@ -9,7 +9,7 @@ const pathProductos= path.join(__dirname, 'products.json'); //Ruta absoluta
 class ProductManager{
     constructor(){
 
-        
+        console.log("Ruta de products.json", pathProductos)
         if (!fs.existsSync(pathProductos)){
             fs.promises.writeFile(pathProductos, JSON.stringify([]));
         }

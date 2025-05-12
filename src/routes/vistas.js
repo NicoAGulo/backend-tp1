@@ -1,7 +1,7 @@
 import * as path from "path";
 import express from "express";
-import CartManager from "../../CartManager.js";
-import ProductManager from "../../ProductManager.js";
+import CartManager from "../CartManager.js";
+import ProductManager from "../ProductManager.js";
 import __dirname from "../utils.js"
 
 const router = express.Router();
