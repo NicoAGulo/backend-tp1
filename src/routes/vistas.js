@@ -62,13 +62,31 @@ router.post("/cart/:cid/delete_product/:pid", async (req, res)=>{
 
 router.get("/realTimeProducts", async (req, res)=>{
     try{
-        const productos= await productManager.getProducts();
-        res.render("partials/realTimeProducts", {productos})
+
+        const ultimoCarrito = await cartManager.getCart();
+        const productosDeCarrito= ultimoCarrito.products;
+        const carritoId = ultimoCarrito.id
+
+        const productos = await productManager.getProducts();
+
+
+        res.render("partials/realTimeProducts", {productos, carritoId})
     }catch(error){
         console.error("Error al cargar la lista de productos disponibles", error);
         res.status(500).send("Error al cargar los productos disponibles")
     }
-
 })
+
+router.post("/cart/:cid/add_product/:pid/realTimeProducts", async (req, res)=>{
+    const {cid, pid} = req.params;
+
+    try{
+        await cartManager.addProductToCart(parseInt(cid), parseInt(pid));
+        res.redirect("/vistas/realTimeProducts");
+    }catch (error){
+        console.error("Error al agregar el producto al carrito:", error);
+        res.status(500).send("Error al agregar el producto al carrito");
+    }
+});
 
 export default router;

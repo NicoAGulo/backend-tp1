@@ -28,6 +28,10 @@
 
     <h3>{{this.price}}</h3>
 
+    <form action="/vistas/cart/{{../carritoId}}/add_product/{{this.id}}/realTimeProducts" method="POST">
+        <button type="submit">+</button>
+    </form>
+
     {{!-- BOTON DE AGREGAR OTRO PRODUCTO IGUAL AL CARRITO --}}
     {{!-- BOTON DE QUITAR PRODUCTO DEL CARRITO | SI no hay productos de este tipo en carrito este boton no aparece--}}
     {{!-- CANTIDAD DE PRODUCTOS SIMILARES A ESTE EN CARRITO | Si es 0 no aparece --}}
