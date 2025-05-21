@@ -8,11 +8,14 @@
 </head>
 <body>
     <header>
+        <div id="mensajeIo"></div>
         <nav>
             <ul>
                 <li>
-                    <a href="home">CARRITO</a>
-                    <a href="realTimeProducts">PRODUCTOS</a>
+                    <a href="/vistas/home">CARRITO</a>
+                </li>
+                <li>
+                    <a href="/vistas/realTimeProducts">PRODUCTOS</a>
                 </li>
             </ul>
         </nav>
@@ -21,6 +24,13 @@
     <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
+
+  socket.on('Bienvenido!', ()=>{
+    const mensajeDiv= document.getElementById('mensajeIo');
+    mensajeDiv.textContent ='Entrega N°2 de Nicolas Alberto Gulo'
+
+    alert('Conectado al servidor con puerto 4000')
+  });
 </script>
 </body>
 </html>
