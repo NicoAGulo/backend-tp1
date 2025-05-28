@@ -22,15 +22,65 @@
     </header>
     {{{body}}}
     <script src="/socket.io/socket.io.js"></script>
-<script>
-  const socket = io();
+    <script>
+        const socket = io();
 
-  socket.on('Bienvenido!', ()=>{
-    const mensajeDiv= document.getElementById('mensajeIo');
-    mensajeDiv.textContent ='Entrega N°2 de Nicolas Alberto Gulo'
+        function agregarProducto(cid, pid) {
+            socket.emit('agregarProducto', { cid, pid });
+        }
 
-    alert('Conectado al servidor con puerto 4000')
-  });
-</script>
+        function eliminarProducto(cid, pid) {
+            socket.emit('eliminarProducto', { cid, pid });
+        }
+
+        socket.on('productoAgregado', (data) => {
+            if (data.success) {
+                alert("✅ Producto agregado correctamente");
+                // actualizar interfaz si querés
+            } else {
+                alert("❌ " + data.error);
+            }
+        });
+
+        socket.on('productoEliminado', (data) => {
+            if (data.success) {
+                alert("🗑️ Producto eliminado correctamente");
+            } else {
+                alert("❌ " + data.error);
+            }
+        });
+
+        socket.on('carritoActualizado', (carrito) => {
+            const cartList = document.getElementById('cart-list');
+            if (!cartList || !carrito || !carrito.products) return;
+
+            let actualizacion= '';
+            carrito.products.forEach(producto => {
+                actualizacion += `<div>
+                        <h6>Categoria: ${producto.category}</h6>
+                    </div>
+    
+                    <div>
+                        <span>ID: ${producto.id}</span>
+                        <h2>TITULO :${producto.title}</h2>
+                    </div>
+    
+                    <div>
+                        <p>Descripcion: ${producto.description}</p>
+                        <p>codigo: ${producto.code}</p>
+                    </div>
+    
+                    <h3>PRECIO: ${producto.price}</h3>
+                    <h4>Cantidad:${producto.quantity}</h4>
+    
+                    <button onclick="agregarProducto('2', '${producto.id}')">Agregar</button>
+    
+                    <button onclick="eliminarProducto('2', '${producto.id}')">Eliminar</button>`;
+        });
+            cartList.innerHTML = actualizacion;
+        });
+
+
+    </script>
 </body>
 </html>

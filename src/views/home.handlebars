@@ -6,37 +6,35 @@
     {{!-- Si el producto que sigue ESTA en la lista entonces agregar al contador de ese producto +1 --}}
 
     {{!-- Si el producto que sigue no esta en la lista entonces renderizarlo --}}
-    {{#each products}}
-        <div class="cart-product">
-            <div>
-                <h6>Categoria: {{this.category}}</h6>
-            </div>
-
-            <div>
-                <span>ID: {{this.id}}</span>
-                <h2>TITULO :{{this.title}}</h2>
-            </div>
-
-            <div>
-                <p>Descripcion: {{this.description}}</p>
-                <p>codigo: {{this.code}}</p>
-            </div>
-
-            <h3>PRECIO: {{this.price}}</h3>
-            <h4>Cantidad:{{this.quantity}}</h4>
-
-            <form action="/vistas/cart/{{../carritoId}}/add_product/{{this.id}}" method="POST">
-                <button type="submit">+</button>
-            </form>
-
-            <form action="/vistas/cart/{{../carritoId}}/delete_product/{{this.id}}" method="POST">
-                <button type="submit">-</button>
-            </form>
-        </div>
-
-        {{!-- BOTON DE AGREGAR OTRO PRODUCTO IGUAL AL CARRITO --}}
-        {{!-- BOTON DE QUITAR PRODUCTO DEL CARRITO | SI no hay productos de este tipo en carrito no aparece--}}
-    {{/each}}
+    <div id="cart-list">
+        {{#each products}}
+                <div class="cart-product">
+                    <div>
+                        <h6>Categoria: {{this.category}}</h6>
+                    </div>
+    
+                    <div>
+                        <span>ID: {{this.id}}</span>
+                        <h2>TITULO :{{this.title}}</h2>
+                    </div>
+    
+                    <div>
+                        <p>Descripcion: {{this.description}}</p>
+                        <p>codigo: {{this.code}}</p>
+                    </div>
+    
+                    <h3>PRECIO: {{this.price}}</h3>
+                    <h4>Cantidad:{{this.quantity}}</h4>
+    
+                    <button onclick="agregarProducto('2', '{{this.id}}')">Agregar</button>
+    
+                    <button onclick="eliminarProducto('2', '{{this.id}}')">Eliminar</button>
+                </div>
+    
+            {{!-- BOTON DE AGREGAR OTRO PRODUCTO IGUAL AL CARRITO --}}
+            {{!-- BOTON DE QUITAR PRODUCTO DEL CARRITO | SI no hay productos de este tipo en carrito no aparece--}}
+        {{/each}}
+    </div>
 {{else}}
     <p>El carrito no tiene productos. Agregalos desde la pestaña PRODUCTOS ↑</p>
 {{/if}}
