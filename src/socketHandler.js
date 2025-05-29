@@ -1,5 +1,6 @@
 import { cartManager } from "./routes/vistas.js";
 
+
 export function socketHandlers(io) {
 
   //INSTANCIA DE IO
@@ -99,120 +100,124 @@ export function socketHandlers(io) {
 
 
 
-    socket.on('uploadFile', async ({ req, res})=>{
+    socket.on('uploadFile', async (fileData)=>{
+      
       try{
-        if (!req.file){
-          const error = {mensaje: 'No se recibio ningun archivo'};
-          
-          req.io.emit('errorSubida', error);
-          
-          return res.status(400).json({
-            success: false,
-            error:error.mensaje
-          });
-        }
-        const fileStats= await fs.stat(req.file.path);
+        if (!fileData || !fileData.filename || !fileData.path) {
+                    const error = { mensaje: 'Datos de archivo incompletos' };
+                    
+                    // ✅ CORRECCIÓN 3: Usar socket.emit en lugar de req.io.emit
+                    // Justificación: En eventos de socket, usamos socket.emit para responder al cliente específico
+                    socket.emit('errorSubida', error);
+                    return;
+                }
+
+        const fileStats= await fs.stat(fileData.path);
 
         const fileInfo ={
           id: Date.now(),
-          nombre: req.file.filename,
-          nombreOriginal: req.file.nombreOriginal,
+          nombre: fileData.filename,
+          nombreOriginal: fileData.originalname,
           tamano: fileStats.size,
-          mimetype: req.file.mimetype,
-          ruta: req.file.path,
+          mimetype: fileData.mimetype,
+          ruta: fileData.path,
           fechaSubida: new Date().toISOString(),
-        }
-        
-        if (req.socketId){
-          req.io.to(req.socketId).emit('archivoSubido', fileInfo);
-        }else{
-          req.io.emit ('archivoSubido', fileInfo)
-        }
-
-        res.json({
-          success: true,
-          mensaje: 'Archivo subido exitosamente',
-          archivo: fileInfo
-        });
-
-        
-      
-      } catch(error){
-        console.error('Error interno al subir archivo', error);
-
-        const errorInfo = {
-          mensaje: 'Error interno al subir archivo',
-          timestamp: new Date().toISOString(),
-          error: error.message
+          socketId: socket.id
         };
 
-        req.io.emit('errorSubida', errorInfo);
+        socket.emit('archivoSubido', fileInfo); 
+        socket.broadcast.emit('nuevoArchivo', fileInfo);
 
-        res.status(500).json({
-          success: false,
-          error: errorInfo.mensaje
-        });
+        console.log('Archivo procesado exitosamente:', fileInfo.nombre);
+      
+      } catch(error){
+        console.error('Error procesando archivo', error);
+
+        const errorInfo = {
+          mensaje: 'Error interno al procesar archivo',
+          timestamp: new Date().toISOString(),
+          error: error.message,
+          socketId: socket.id
+        };
+
+        socket.emit('errorSubida', errorInfo);
       }
-    })
-    socket.on('getFiles', async ({req, res})=>{
+    });
+    socket.on('getFiles', async ()=>{
       try{
         const files = await fs.readdir('./uploads');
         const fileDetails = await Promise.all (
-          files.map(async (file =>{
+          files.map(async (file) =>{
             const filePath = path.join('./uploads', file);
-            const stats= fs.stat(filePath);
+            const stats= await fs.stat(filePath);
             return{
               nombre: file,
               tamano: stats.size,
               fechaModificacion: stats.mtime
             };
-          }))
-        )
-        res.json({
+          })
+        );
+
+        socket.emit('listaArchivos', {
           success: true,
-          archivos: fileDetails
+          archivos: fileDetails,
+          total: fileDetails.length
         });
+
       }catch (error){
         console.error('Error obteniendo archivos:', error);
-        res.status(500).json({
+        socket.emit('errorListaArchivos', {
           success: false,
-          error: 'Error al obtener lista de archivos'
+          error: 'Error al obtener lista de archivos',
+          timestamp: new Date().toISOString()
         });
       }
-    })
-    socket.on('deleteFile', async ({req, res})=>{
+    });
+    socket.on('deleteFile', async ({filename})=>{
       try{
+        if(!filename){
+          socket.emit('errorEliminacion', {
+            success: false,
+            error: 'Nombre de archivo requerido'
+          });
+          return;
+        }
+
         const {filename} = req.params;
         const filePath = path.join('./uploads', filename);
 
         await fs.access(filePath);
-
         await fs.unlink(filePath);
 
         const deleteInfo = {
           archivo: filename,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          eliminadoPor: socket.id
         };
 
-        req.io.emit('archivoEliminado', deleteInfo);
+        io.emit('archivoEliminado', deleteInfo);
 
-        res.json({
-          success:true,
-          mensaje: 'Archivo eliminado exitosamente'
+        socket.emit('eliminacionExitosa', {
+          success: true,
+          mensaje: 'Archivo eliminado exitosamente',
+          archivo: filename
         });
+
       }catch (error){
         console.error('Error eliminando archivo:', error);
-        res.status(500).json({
+
+        socket.emit('errorEliminacion', {
           success: false,
-          error: 'Error al eliminar archivo'
+          error: 'Error al eliminar archivo',
+          details: error.message
         });
       }
-    })
+    });
 
-
-
+    socket.on('disconnect', () => {
+      console.log(`Cliente desconectado: ${socket.id}`);
+    });
   });
-
 }
 
 export const notificarATodos = (io, evento, data) => {

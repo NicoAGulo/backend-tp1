@@ -15,8 +15,47 @@
     </ul>
 </div>
 
-<form action="/upload" method="post" enctype="multipart/form-data">
+<form id="uploadForm" enctype="multipart/form-data">
     <label for="archivo">Selecciona un listado de productos</label>
     <input type="file" name="archivo" id="archivo" required>
-    <button>Subir archivo .json</button>
+    <button type="submit">Enviar</button>
 </form>
+
+<div id="mensaje"></div>
+
+<h2>Archivos subidos</h2>
+<ul>
+    {{#each archivos}}
+        <li>{{this}}</li>
+    {{/each}}
+</ul>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await fetch('/vistas/upload', { // <-- Ruta correcta según tu router
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            document.getElementById('mensaje').innerHTML = 
+                `<div class="alert alert-success">${result.mensaje || 'Archivo subido exitosamente.'}</div>`;
+            e.target.reset(); // Limpiar formulario
+        } else {
+            document.getElementById('mensaje').innerHTML = 
+                `<div class="alert alert-danger">${result.error || 'Error al subir archivo.'}</div>`;
+        }
+    } catch (error) {
+        document.getElementById('mensaje').innerHTML = 
+            `<div class="alert alert-danger">Error al subir archivo</div>`;
+    }
+});
+</script>
+

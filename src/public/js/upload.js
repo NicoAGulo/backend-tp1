@@ -17,31 +17,34 @@ socket.on('clienteConectado', (data) => {
 
 socket.on('archivoSubido', (fileInfo) => {
     console.log('Archivo subido:', fileInfo);
-    mostrarNotificacion(`✅ ${fileInfo.nombreOriginal} subido exitosamente`);
-    actualizarListaArchivos();
-});
-
-socket.on('archivosSubidos', (data) => {
-    console.log('Múltiples archivos subidos:', data);
-    mostrarNotificacion(`✅ ${data.cantidad} archivos subidos exitosamente`);
+    mostrarNotificacion(`${fileInfo.nombreOriginal} subido exitosamente`);
     actualizarListaArchivos();
 });
 
 socket.on('archivoEliminado', (data) => {
     console.log('Archivo eliminado:', data);
-    mostrarNotificacion(`🗑️ ${data.archivo} eliminado`);
+    mostrarNotificacion(`${data.archivo} eliminado`);
     actualizarListaArchivos();
 });
 
 socket.on('errorSubida', (error) => {
     console.error('Error en subida:', error);
-    mostrarError(`❌ ${error.mensaje}`);
+    mostrarError(`${error.mensaje}`);
 });
 
 socket.on('listaArchivos', (data) => {
     console.log('Lista de archivos recibida:', data);
     renderizarListaArchivos(data.archivos);
 });
+
+function solicitarArchivos() {
+    socket.emit('getFiles');
+}
+
+function eliminarArchivo(filename) {
+    socket.emit('deleteFile', { filename });
+}
+
 
 // Funciones de utilidad
 function mostrarNotificacion(mensaje) {
@@ -67,7 +70,7 @@ function renderizarListaArchivos(archivos) {
 async function subirArchivo(formData) {
     try {
         // Agregar socket ID para notificaciones específicas
-        const response = await fetch('/api/upload', {
+        const response = await fetch('/vistas/upload', {
             method: 'POST',
             headers: {
                 'X-Socket-Id': socketId

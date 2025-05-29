@@ -7,6 +7,7 @@ import {Server} from "socket.io"
 import { createServer } from "http"
 import {router} from './routes/vistas.js'
 import { socketHandlers } from "./socketHandler.js"
+import { socketMiddleware } from "./middlewares/socketMiddleware.js"
 
 const app = express()
 const PORT= 4000
@@ -30,14 +31,11 @@ const io = new Server(httpServer, {
     }
 });
 
-
-app.use((req, res, next) => {
-    req.io = io;
-    next();
-});
+app.set('io', io);
+app.use(socketMiddleware);
 
 //ROUTER
-app.use('/vistas', router)
+app.use('/vistas', router);
 
 socketHandlers(io);
 

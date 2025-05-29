@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "title": "Nike Court Vision",
+    "description": "Nike Court Vision todas blancas con cordones en negro.",
+    "code": "S89H1WE",
+    "price": 1500,
+    "status": true,
+    "stock": 12,
+    "category": "Calzado",
+    "thumbnails": [
+      "img/nikecourtvision1.jpg",
+      "img/nikecourtvision2.jpg"
+    ]
+  }
+]

@@ -93,6 +93,63 @@ export const getFiles = async (req, res) => {
     }
 };
 
+export const readFile = async (req, res) => {
+    try {
+        const { filename } = req.params;
+        const filePath = path.join('./uploads', filename);
+        
+        // Verificar que el archivo existe y está en uploads
+        await fs.access(filePath);
+        
+        // Leer contenido del archivo
+        const contenido = await fs.readFile(filePath, 'utf8');
+        
+        // Si es JSON, parsearlo para verificar que es válido
+        let data = contenido;
+        if (filename.endsWith('.json')) {
+            try {
+                data = JSON.parse(contenido);
+            } catch (parseError) {
+                console.error('Error parseando JSON:', parseError);
+                // Si no se puede parsear, devolver como texto
+                data = contenido;
+            }
+        }
+        
+        const fileInfo = {
+            archivo: filename,
+            contenido: data,
+            tipo: filename.split('.').pop().toLowerCase(),
+            timestamp: new Date().toISOString()
+        };
+        
+        // Notificar lectura via WebSocket (opcional)
+        if (req.io) {
+            req.io.emit('archivoLeido', { archivo: filename, timestamp: fileInfo.timestamp });
+        }
+        
+        res.json({
+            success: true,
+            ...fileInfo
+        });
+        
+    } catch (error) {
+        console.error('Error leyendo archivo:', error);
+        
+        let errorMessage = 'Error al leer archivo';
+        if (error.code === 'ENOENT') {
+            errorMessage = 'Archivo no encontrado';
+        } else if (error.code === 'EACCES') {
+            errorMessage = 'Sin permisos para leer el archivo';
+        }
+        
+        res.status(500).json({
+            success: false,
+            error: errorMessage
+        });
+    }
+};
+
 export const deleteFile = async (req, res) => {
     try {
         const { filename } = req.params;
