@@ -3,12 +3,38 @@ import express from "express";
 import CartManager from "../CartManager.js";
 import ProductManager from "../ProductManager.js";
 import __dirname from "../utils.js"
+import upload from '../middlewares/multer.js';
+import { socketMiddleware } from '../middlewares/socketMiddleware.js';
+import { 
+    uploadFile, 
+    getFiles, 
+    deleteFile 
+} from '../controllers/uploadController.js';
+
 
 const router = express.Router();
 const productManager= new ProductManager();
 const cartManager= new CartManager(productManager);
 
 const filePath =path.join(__dirname, "../../products.json")
+
+router.use(socketMiddleware);
+
+router.post('/upload', upload.single('archivo'), uploadFile);
+router.get('/files', getFiles);
+router.delete('/files/:filename', deleteFile);
+
+
+
+//ruta que recibe archivos:
+router.post('/upload', upload.single('archivo', (req, res)=>{
+    if (!req.file){
+        return res.status(400).send('no se subio ningun archivo.');
+    }
+    res.send(`Archivo ${req.file.originalname} subido exitosamente.`)
+}))
+
+
 
 router.get('/home', async (req, res)=>{
     try{

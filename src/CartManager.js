@@ -54,63 +54,67 @@ class CartManager{
     
     async addProductToCart(cid, pid){
         //La funcion agrega producto con id *pid* al final de la lista del carrito con id *cid*
-        
-        const listaCarritos= await this.getCarts();
-        const carrito= await this.getCartById(cid);
-        const producto= await this.productManager.getProductById(pid);
+        try{
+            const listaCarritos= await this.getCarts();
+            const carrito= await this.getCartById(cid);
+            const producto= await this.productManager.getProductById(pid);
+            
+            if(!carrito){
+                // console.error(`carrito con id ${cid} no encontrado.`)
+                return {success: false, message: "Carrito no encontrado"};
+            }
+            
+            if(!producto){
+                // console.error(`Producto con id ${pid} no encontrado.`)
+                return{success: false, message:"Producto no encontrado"};
+            }
+            
+            
+            carrito.products.push(producto);
 
-        if(!carrito){
-            console.error(`carrito con id ${cid} no encontrado.`)
-            return;
+            const index = listaCarritos.findIndex(c => c.id === cid);
+            if (index !== -1) {
+              listaCarritos[index] = carrito;
+            }            
+            await fs.promises.writeFile(pathCarritos, JSON.stringify(listaCarritos, null, 2));
+
+            return {success: true};
+        }catch(error){
+            console.error('Error real al agregar producto:', error)
+            return{success: false, message:"Error interno"}
         }
-        
-        if(!producto){
-            console.error(`Producto con id ${pid} no encontrado.`)
-            return;
-        }
-
-
-        carrito.products.push(producto);
-
-        const carritoIndex = listaCarritos.findIndex(c=> c.id ===cid)
-        listaCarritos[carritoIndex] = carrito;
-    
-        await fs.promises.writeFile(pathCarritos, JSON.stringify(listaCarritos, null, 2));
-
-        console.log(`Producto con ID ${pid} agregado al carrito con ID ${cid}.`);
     }
 
     async removeProductFromCart(cid, pid) {
     // Obtener la lista de carritos
     const listaCarritos = await this.getCarts();
-    const carrito = await this.getCartById(cid);
+    const carritoIndex = listaCarritos.findIndex(c => c.id ===cid);
 
     // Validar si el carrito existe
-    if (!carrito) {
+    if (carritoIndex === -1) {
         console.error(`Carrito con id ${cid} no encontrado.`);
-        return;
+        return{success: false, message: "Carrito no encontrado"};
     }
+    
+    // Actualizar el carrito en la lista general
+    const carrito = listaCarritos[carritoIndex]
 
     // Buscar el índice del producto en el carrito
     const productIndex = carrito.products.findIndex(producto => producto.id === pid);
-
     // Validar si el producto existe en el carrito
     if (productIndex === -1) {
         console.error(`Producto con id ${pid} no encontrado en el carrito con id ${cid}.`);
-        return;
+        return{ success: false, message:"Producto no encontrado en el carrito"};
     }
 
     // Eliminar el producto del carrito
     carrito.products.splice(productIndex, 1);
 
-    // Actualizar el carrito en la lista general
-    const carritoIndex = listaCarritos.findIndex(c => c.id === cid);
-    listaCarritos[carritoIndex] = carrito;
-
     // Guardar los cambios en el archivo
     await fs.promises.writeFile(pathCarritos, JSON.stringify(listaCarritos, null, 2));
 
     console.log(`Producto con ID ${pid} eliminado del carrito con ID ${cid}.`);
+    return{success: true};
 }
 
 

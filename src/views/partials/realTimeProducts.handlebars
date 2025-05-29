@@ -28,9 +28,9 @@
 
     <h3>{{this.price}}</h3>
 
-    <form action="/vistas/cart/{{../carritoId}}/add_product/{{this.id}}/realTimeProducts" method="POST">
-        <button type="submit">+</button>
-    </form>
+    <button onclick="agregarProducto('2', '{{this.id}}')">Agregar</button>
+    
+    <button onclick="eliminarProducto('2', '{{this.id}}')">Eliminar</button>
 
     {{!-- <button onclick="agregarProducto('{{../carritoId}}', '{{this.id}}')">+</button> --}}
 

@@ -38,10 +38,10 @@ class ProductManager{
         //La funcion actualiza un producto existente en la lista cuyo id sea igual al 1er argumento dado y lo reemplaza por un objeto nuevo en el 2do argumento dado.
         const productos = await this.getProducts();
 
-        const index = productos.findIndex(producto=> producto.id ===pid);
+        const app = productos.findapp(producto=> producto.id ===pid);
 
 
-        productos[index] = {...productos[index], ...updated}
+        productos[app] = {...productos[app], ...updated}
 
         await fs.promises.writeFile(pathProductos, JSON.stringify(productos, null, 2));
     }
