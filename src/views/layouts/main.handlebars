@@ -28,14 +28,25 @@
     <script>
         const socket = io();
 
-        function agregarProducto(cid, pid) {
+        // EXPONER FUNCIONES GLOBALMENTE para que las usen otros scripts
+        window.agregarProducto = function(cid, pid) {
             socket.emit('agregarProducto', { cid, pid });
         }
 
-        function eliminarProducto(cid, pid) {
+        window.eliminarProducto = function(cid, pid) {
             socket.emit('eliminarProducto', { cid, pid });
         }
 
+        // Mantener funciones locales por compatibilidad
+        function agregarProducto(cid, pid) {
+            window.agregarProducto(cid, pid);
+        }
+
+        function eliminarProducto(cid, pid) {
+            window.eliminarProducto(cid, pid);
+        }
+
+        // Eventos para operaciones de carrito
         socket.on('productoAgregado', (data) => {
             if (data.success) {
                 alert("✅ Producto agregado correctamente");
@@ -50,6 +61,23 @@
                 alert("🗑️ Producto eliminado correctamente");
             } else {
                 alert("❌ " + data.error);
+            }
+        });
+
+        // Mantener compatibilidad con eventos nuevos
+        socket.on('productoAgregadoCarrito', (data) => {
+            if (data.success) {
+                alert("✅ Producto agregado correctamente al carrito");
+            } else {
+                alert("❌ " + (data.message || data.error));
+            }
+        });
+
+        socket.on('productoEliminadoCarrito', (data) => {
+            if (data.success) {
+                alert("🗑️ Producto eliminado correctamente del carrito");
+            } else {
+                alert("❌ " + (data.message || data.error));
             }
         });
 

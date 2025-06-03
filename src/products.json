@@ -40,18 +40,6 @@
     ]
   },
   {
-    "id": 4,
-    "title": "Pelota Ping Pong Xhia",
-    "description": "Pelota Ping Pong Xhia para deporte profesional",
-    "code": "WEQT818",
-    "price": 25,
-    "status": true,
-    "category": "Pelotas",
-    "thumbnails": [
-      "img/pelotaxhia1.jpg"
-    ]
-  },
-  {
     "id": 5,
     "title": "Campera Adidas Urban XY",
     "description": "Campera Adidas Urban XY roja con capucha ergonomica",
@@ -62,5 +50,50 @@
     "thumbnails": [
       "img/camperaadidasurbanxy1.jpg"
     ]
+  },
+  {
+    "title": "Nike Zanner",
+    "description": "Zapatilla nueva actualizada",
+    "price": 2000,
+    "code": "S888AA2",
+    "stock": 6,
+    "category": "Calzado",
+    "thumbnail": ""
+  },
+  {
+    "title": "Nike Zanner",
+    "description": "Zapatilla nueva actualizada",
+    "price": 2000,
+    "code": "S888AA2",
+    "stock": 6,
+    "category": "Calzado",
+    "thumbnail": "www.google.com"
+  },
+  {
+    "title": "Nike Zanner",
+    "description": "Zapatilla nueva actualizada",
+    "price": 2000,
+    "code": "S888AA2",
+    "stock": 6,
+    "category": "Calzado",
+    "thumbnail": "www.google.com"
+  },
+  {
+    "title": "Nike Zanner",
+    "description": "Zapatilla nueva actualizada",
+    "price": 2000,
+    "code": "S888AA2",
+    "stock": 6,
+    "category": "Calzado",
+    "thumbnail": "www.google.com"
+  },
+  {
+    "title": "Adidas Flat White",
+    "description": "Calzado inspirado en el cafe",
+    "price": 3400,
+    "code": "CF222FFX",
+    "stock": 44,
+    "category": "Calzado",
+    "thumbnail": "www.google.com"
   }
 ]

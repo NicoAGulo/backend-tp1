@@ -1,43 +1,371 @@
-{{!-- ACA SE VISUALIZAN TODOS LOS ARCHIVOS DE PRODUCTS.JSON 
-    *CADA PRODUCTO DEBE CONTAR CON UN BOTON PARA SER ELIMINADO
-    *TAMBIEN HAY UN FORMULARIO PARA CREAR PRODUCTOS NUEVOS
-    
-    TANTO AL ELIMINAR COMO AL CREAR SE ACTUALIZA AUTOMATICAMENTE CON WEBSOCKET
-    EL SOCKET DE SV SE UTILIZA ProductManager.js para gestion de productos.
---}}
-
-
 <h1>PRODUCTOS</h1>
+
+<h2>Agregar Nuevo Producto</h2>
+<form id="form-agregar-producto">
+    <div>
+        <label for="title">Título:</label>
+        <input type="text" id="title" name="title" required>
+    </div>
+    
+    <div>
+        <label for="description">Descripción:</label>
+        <input type="text" id="description" name="description" required>
+    </div>
+    
+    <div>
+        <label for="code">Código:</label>
+        <input type="text" id="code" name="code" required>
+    </div>
+    
+    <div>
+        <label for="price">Precio:</label>
+        <input type="number" id="price" name="price" step="0.01" required>
+    </div>
+    
+    <div>
+        <label for="stock">Stock:</label>
+        <input type="number" id="stock" name="stock" required>
+    </div>
+    
+    <div>
+        <label for="category">Categoría:</label>
+        <input type="text" id="category" name="category" required>
+    </div>
+    
+    <div>
+        <label for="thumbnail">Thumbnail (URL):</label>
+        <input type="text" id="thumbnail" name="thumbnail">
+    </div>
+    
+    <button type="submit">Agregar Producto</button>
+</form>
+
 <h2>Listado de productos disponibles</h2>
+<div id="productos-container">
+    <!-- Los productos se cargarán dinámicamente aquí -->
+</div>
 
-{{#each productos}}
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    if (typeof io === 'undefined') {
+        console.error('Socket.IO no está cargado');
+        alert('Error: No se puede conectar al servidor');
+    }
     
-    <div>
-        <h6>{{this.category}}</h6>
-    </div>
-
-    <div>
-        <span>{{this.id}}</span>
-        <h2>{{this.title}}</h2>
-    </div>
+    let socketRealTime;
+    let productosActuales = [];
     
-    <div>
-        <p>{{this.description}}</p>
-        <p>{{this.code}}</p>
-    </div>
-
-    <h3>{{this.price}}</h3>
-
-    <button onclick="agregarProducto('2', '{{this.id}}')">Agregar</button>
+    try {
+        socketRealTime = io();
+        console.log('Socket.IO conectado correctamente para realTimeProducts');
+    } catch (error) {
+        console.error('Error al inicializar Socket.IO:', error);
+        alert('Error de conexión con el servidor');
+    }
     
-    <button onclick="eliminarProducto('2', '{{this.id}}')">Eliminar</button>
-
-    {{!-- <button onclick="agregarProducto('{{../carritoId}}', '{{this.id}}')">+</button> --}}
-
-    {{!-- BOTON DE AGREGAR OTRO PRODUCTO IGUAL AL CARRITO --}}
-    {{!-- BOTON DE QUITAR PRODUCTO DEL CARRITO | SI no hay productos de este tipo en carrito este boton no aparece--}}
-    {{!-- CANTIDAD DE PRODUCTOS SIMILARES A ESTE EN CARRITO | Si es 0 no aparece --}}
-
-
-{{/each}}
-
+    function obtenerCarritoActual() {
+        // Usar el mismo carrito que en main.handlebars (carrito '2')
+        return '2';
+    }
+    
+    function renderizarProductos(productos) {
+        const container = document.getElementById('productos-container');
+        if (!container) return;
+        
+        container.innerHTML = productos.map(producto => `
+            <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+                <div>
+                    <h6>Categoria: ${producto.category}</h6>
+                </div>
+                <div>
+                    <span>ID: ${producto.id}</span>
+                    <h2>TITULO: ${producto.title}</h2>
+                </div>
+                <div>
+                    <p>Descripcion: ${producto.description}</p>
+                    <p>Codigo: ${producto.code}</p>
+                </div>
+                <h3>PRECIO: ${producto.price}</h3>
+                <p>Stock: ${producto.stock}</p>
+                <button onclick="agregarProductoAlCarrito('${producto.id}')">Agregar al Carrito</button>
+                <button onclick="eliminarProductoDelCarrito('${producto.id}')">Eliminar del Carrito</button>
+                <button onclick="eliminarProductoDisponible('${producto.id}')" style="background-color: red; color: white;">Eliminar Producto</button>
+            </div>
+        `).join('');
+    }
+    
+    function agregarNuevoProducto(event) {
+        event.preventDefault();
+        
+        const formData = new FormData(event.target);
+        const productData = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            price: parseFloat(formData.get('price')),
+            code: formData.get('code'),
+            stock: parseInt(formData.get('stock')),
+            category: formData.get('category'),
+            thumbnail: formData.get('thumbnail') || ''
+        };
+        
+        // Validación básica
+        if (!productData.title || !productData.description || !productData.code) {
+            alert('Por favor completa todos los campos obligatorios');
+            return;
+        }
+        
+        if (isNaN(productData.price) || productData.price <= 0) {
+            alert('Por favor ingresa un precio válido');
+            return;
+        }
+        
+        if (isNaN(productData.stock) || productData.stock < 0) {
+            alert('Por favor ingresa un stock válido');
+            return;
+        }
+        
+        console.log('Agregando nuevo producto:', productData);
+        
+        // Mostrar mensaje de "procesando"
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Agregando...';
+        submitBtn.disabled = true;
+        
+        
+        socketRealTime.emit('agregarProductoRealTime', productData);
+    }
+    
+    function eliminarProductoDisponible(pid) {
+        if (!confirm('¿Estás seguro de que quieres eliminar este producto de la lista disponible?')) {
+            return;
+        }
+        
+        console.log('Eliminando producto disponible:', pid);
+        
+        // Deshabilitar temporalmente todos los botones de eliminar
+        const deleteButtons = document.querySelectorAll('button[style*="red"]');
+        deleteButtons.forEach(btn => {
+            if (btn.onclick && btn.onclick.toString().includes(pid)) {
+                btn.textContent = 'Eliminando...';
+                btn.disabled = true;
+            }
+        });
+        
+        socketRealTime.emit('eliminarProductoRealTime', pid);
+    }
+    
+    function agregarProductoAlCarrito(pid) {
+        // Usar la función global si existe (desde main.handlebars)
+        if (typeof window.agregarProducto === 'function') {
+            const cid = obtenerCarritoActual();
+            window.agregarProducto(cid, pid);
+            return;
+        }
+        
+        // Fallback: usar socket local si no existe la función global
+        if (!socketRealTime) {
+            alert('Error: No hay conexión con el servidor');
+            return;
+        }
+        
+        const cid = obtenerCarritoActual();
+        console.log(`Agregando producto ${pid} al carrito ${cid}`);
+        socketRealTime.emit('agregarProducto', { cid, pid });
+    }
+    
+    function eliminarProductoDelCarrito(pid) {
+        // Usar la función global si existe (desde main.handlebars)
+        if (typeof window.eliminarProducto === 'function') {
+            const cid = obtenerCarritoActual();
+            window.eliminarProducto(cid, pid);
+            return;
+        }
+        
+        // Fallback: usar socket local si no existe la función global
+        if (!socketRealTime) {
+            alert('Error: No hay conexión con el servidor');
+            return;
+        }
+        
+        const cid = obtenerCarritoActual();
+        console.log(`Eliminando producto ${pid} del carrito ${cid}`);
+        socketRealTime.emit('eliminarProducto', { cid, pid });
+    }
+    
+    function limpiarFormulario() {
+        const form = document.getElementById('form-agregar-producto');
+        if (form) {
+            form.reset();
+        }
+        
+        // Restaurar botón
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.textContent = 'Agregar Producto';
+            submitBtn.disabled = false;
+        }
+    }
+    
+    if (socketRealTime) {
+        socketRealTime.on('connect', () => {
+            console.log('Conectado al servidor Socket.IO');
+            // Solicitar productos al conectarse
+            socketRealTime.emit('solicitarProductos');
+        });
+        
+        socketRealTime.on('disconnect', () => {
+            console.log('Desconectado del servidor Socket.IO');
+        });
+        
+        // === EVENTOS PARA PRODUCTOS EN LA LISTA PRINCIPAL ===
+        
+        // Evento específico para cuando se agrega un producto a la lista
+        socketRealTime.on('productoAgregadoLista', (data) => {
+            if (data.success) {
+                alert('¡Producto agregado exitosamente a la lista!');
+                limpiarFormulario();
+                // Actualizar la lista de productos
+                if (data.productos) {
+                    productosActuales = data.productos;
+                    renderizarProductos(productosActuales);
+                }
+            } else {
+                alert(data.message || 'Error al agregar producto a la lista');
+                limpiarFormulario();
+            }
+        });
+        
+        // Evento específico para cuando se elimina un producto de la lista
+        socketRealTime.on('productoEliminadoLista', (data) => {
+            console.log('Producto eliminado de la lista:', data);
+            if (data.success) {
+                alert('¡Producto eliminado exitosamente de la lista!');
+                // Actualizar la lista de productos
+                if (data.productos) {
+                    productosActuales = data.productos;
+                    renderizarProductos(productosActuales);
+                }
+            } else {
+                alert(data.message || 'Error al eliminar producto de la lista');
+                // Re-habilitar botones en caso de error
+                const deleteButtons = document.querySelectorAll('button[disabled]');
+                deleteButtons.forEach(btn => {
+                    if (btn.textContent === 'Eliminando...') {
+                        btn.textContent = 'Eliminar Producto';
+                        btn.disabled = false;
+                    }
+                });
+            }
+        });
+        
+        // === EVENTOS PARA CARRITO ===
+        
+        // Usar los mismos eventos que main.handlebars
+        socketRealTime.on('productoAgregado', (data) => {
+            console.log('Respuesta agregar producto al carrito:', data);
+            if (data.success) {
+                alert('✅ Producto agregado al carrito exitosamente');
+            } else {
+                alert('❌ ' + (data.error || 'Error al agregar producto al carrito'));
+            }
+        });
+        
+        socketRealTime.on('productoEliminado', (data) => {
+            console.log('Respuesta eliminar producto del carrito:', data);
+            if (data.success) {
+                alert('🗑️ Producto eliminado del carrito exitosamente');
+            } else {
+                alert('❌ ' + (data.error || 'Error al eliminar producto del carrito'));
+            }
+        });
+        
+        // Mantener compatibilidad con eventos nuevos
+        socketRealTime.on('productoAgregadoCarrito', (data) => {
+            console.log('Respuesta agregar producto al carrito (nuevo):', data);
+            if (data.success) {
+                alert('✅ Producto agregado al carrito exitosamente');
+            } else {
+                alert('❌ ' + (data.message || 'Error al agregar producto al carrito'));
+            }
+        });
+        
+        socketRealTime.on('productoEliminadoCarrito', (data) => {
+            console.log('Respuesta eliminar producto del carrito (nuevo):', data);
+            if (data.success) {
+                alert('🗑️ Producto eliminado del carrito exitosamente');
+            } else {
+                alert('❌ ' + (data.message || 'Error al eliminar producto del carrito'));
+            }
+        });
+        
+        // === EVENTOS GENERALES ===
+        
+        // Evento para actualización general de productos
+        socketRealTime.on('productosActualizados', (data) => {
+            console.log('Lista de productos actualizada:', data);
+            if (data.success && data.productos) {
+                productosActuales = data.productos;
+                renderizarProductos(productosActuales);
+            }
+        });
+        
+        // Evento para recibir la lista inicial de productos
+        socketRealTime.on('listaProductos', (data) => {
+            console.log('Lista inicial de productos recibida:', data);
+            if (data.success && data.productos) {
+                productosActuales = data.productos;
+                renderizarProductos(productosActuales);
+            }
+        });
+        
+        // === EVENTOS DE ERROR ===
+        
+        socketRealTime.on('errorProducto', (data) => {
+            console.error('Error de producto:', data);
+            alert(data.error || data.message || 'Error en operación de producto');
+            limpiarFormulario();
+        });
+        
+        socketRealTime.on('errorCarrito', (data) => {
+            console.error('Error del carrito:', data);
+            alert(data.error || data.message || 'Error en operación del carrito');
+        });
+        
+        socketRealTime.on('connect_error', (error) => {
+            console.error('Error de conexión Socket.IO:', error);  
+            alert('Error de conexión con el servidor');
+        });
+        
+        // === EVENTOS LEGACY (mantenidos por compatibilidad) ===
+        
+        socketRealTime.on('productoAgregadoExito', (data) => {
+            console.log('Evento legacy - producto agregado:', data);
+            alert(data.mensaje || 'Producto agregado exitosamente');
+            limpiarFormulario();
+        });
+        
+        socketRealTime.on('productoEliminadoExito', (data) => {
+            console.log('Evento legacy - producto eliminado:', data);
+            alert(data.mensaje || 'Producto eliminado exitosamente');
+        });
+    }
+    
+    // Configurar eventos cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM cargado, configurando eventos...');
+        
+        // Configurar evento del formulario
+        const form = document.getElementById('form-agregar-producto');
+        if (form) {
+            form.addEventListener('submit', agregarNuevoProducto);
+        }
+        
+        // Solicitar productos si el socket ya está conectado
+        if (socketRealTime && socketRealTime.connected) {
+            console.log('Socket ya conectado, solicitando productos...');
+            socketRealTime.emit('solicitarProductos');
+        }
+    });
+</script>
