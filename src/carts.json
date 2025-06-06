@@ -144,19 +144,6 @@
     "id": 2,
     "products": [
       {
-        "id": 3,
-        "title": "Jaguar Flatest F-2",
-        "description": "Jaguar Flatest F-2 de alto rendimiento",
-        "code": "GZXG6A6",
-        "price": 1900,
-        "status": true,
-        "category": "Calzado",
-        "thumbnails": [
-          "img/jaguarflatest1.jpg",
-          "img/jaguarflatest2.jpg"
-        ]
-      },
-      {
         "id": 1,
         "title": "Nike Court Vision",
         "description": "Nike Court Vision todas blancas con cordones en negro.",
@@ -702,6 +689,19 @@
         "thumbnails": [
           "img/nikecourtvision1.jpg",
           "img/nikecourtvision2.jpg"
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Jaguar Flatest F-2",
+        "description": "Jaguar Flatest F-2 de alto rendimiento",
+        "code": "GZXG6A6",
+        "price": 1900,
+        "status": true,
+        "category": "Calzado",
+        "thumbnails": [
+          "img/jaguarflatest1.jpg",
+          "img/jaguarflatest2.jpg"
         ]
       }
     ]

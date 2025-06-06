@@ -81,7 +81,7 @@ export const getFiles = async (req, res) => {
 
         res.json({
             success: true,
-            archivos: fileDetails
+            files: fileDetails  // <-- Cambiar "archivos" por "files"
         });
         
     } catch (error) {

@@ -1,61 +1,152 @@
 <h1>↓ Subi tu listado de productos disponibles ACA ↓</h1>
-<h5>Contrato:</h5>
-<div id="contratoUpload">
-    <h6>Cada producto tiene los siguientes atributos como precondicion:</h6>
-    <ul>
-        <li>id: NumeroEntero</li>
-        <li>title: NombreDelProducto</li>
-        <li>description: DescripcionDelProducto</li>
-        <li>code: CodigoDeLetrasYNumerosMayusculas</li>
-        <li>price: NumeroDePrecio</li>
-        <li>status: EstadoEnBooleano</li>
-        <li>stock: NumeroDeStock</li>
-        <li>category: CategoriaDeProducto</li>
-        <li>thumbnails: ImagenReducidaDeProducto</li>        
-    </ul>
-</div>
+    <h5>Contrato:</h5>
+    <div id="contratoUpload">
+        <h6>Cada producto tiene los siguientes atributos como precondicion:</h6>
+        <ul>
+            <li>id: NumeroEntero</li>
+            <li>title: NombreDelProducto</li>
+            <li>description: DescripcionDelProducto</li>
+            <li>code: CodigoDeLetrasYNumerosMayusculas</li>
+            <li>price: NumeroDePrecio</li>
+            <li>status: EstadoEnBooleano</li>
+            <li>stock: NumeroDeStock</li>
+            <li>category: CategoriaDeProducto</li>
+            <li>thumbnails: ImagenReducidaDeProducto</li>
+        </ul>
+    </div>
 
-<form id="uploadForm" enctype="multipart/form-data">
-    <label for="archivo">Selecciona un listado de productos</label>
-    <input type="file" name="archivo" id="archivo" required>
-    <button type="submit">Enviar</button>
-</form>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="archivo">Selecciona un listado de productos</label>
+        <input type="file" name="archivo" id="archivo" required>
+        <button type="submit">Enviar</button>
+    </form>
 
-<div id="mensaje"></div>
+    <div id="mensaje"></div>
 
-<h2>Archivos subidos</h2>
-<ul>
-    {{#each archivos}}
-        <li>{{this}}</li>
-    {{/each}}
-</ul>
+    <h2>Archivos disponibles</h2>
+    <div id="archivosContainer">
+        <p>Cargando archivos...</p>
+    </div>
 
-<script>
-document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(e.target);
-    
-    try {
-        const response = await fetch('/vistas/upload', { // <-- Ruta correcta según tu router
-            method: 'POST',
-            body: formData
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            document.getElementById('mensaje').innerHTML = 
-                `<div class="alert alert-success">${result.mensaje || 'Archivo subido exitosamente.'}</div>`;
-            e.target.reset(); // Limpiar formulario
-        } else {
-            document.getElementById('mensaje').innerHTML = 
-                `<div class="alert alert-danger">${result.error || 'Error al subir archivo.'}</div>`;
+    <form id="seleccionForm">
+        <button type="button" id="aplicarSeleccion">Aplicar archivo seleccionado como products.json</button>
+    </form>
+
+    <div id="mensajeSeleccion"></div>
+
+    <script>
+        // Función para cargar la lista de archivos
+        async function cargarArchivos() {
+            try {
+                const response = await fetch('/vistas/files');
+                const result = await response.json();
+                
+                console.log('Respuesta completa del servidor:', result);
+                
+                const container = document.getElementById('archivosContainer');
+                
+                if (result.success && result.files && result.files.length > 0) {
+                    let html = '<div>';
+                    result.files.forEach(archivoObj => {
+                        console.log('Procesando archivo:', archivoObj);
+                        const nombreArchivo = archivoObj.nombre;
+                        html += `
+                            <div>
+                                <input type="radio" name="archivoSeleccionado" value="${nombreArchivo}" id="archivo_${nombreArchivo}">
+                                <label for="archivo_${nombreArchivo}">${nombreArchivo}</label>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
+                } else {
+                    console.log('Condición fallida:', {
+                        success: result.success,
+                        files: result.files,
+                        length: result.files ? result.files.length : 'undefined'
+                    });
+                    container.innerHTML = '<p>No hay archivos disponibles en la carpeta uploads.</p>';
+                }
+            } catch (error) {
+                console.error('Error al cargar archivos:', error);
+                document.getElementById('archivosContainer').innerHTML = '<p>Error al cargar la lista de archivos.</p>';
+            }
         }
-    } catch (error) {
-        document.getElementById('mensaje').innerHTML = 
-            `<div class="alert alert-danger">Error al subir archivo</div>`;
-    }
-});
-</script>
 
+        // Función para aplicar el archivo seleccionado
+        async function aplicarArchivoSeleccionado() {
+            const seleccionado = document.querySelector('input[name="archivoSeleccionado"]:checked');
+            
+            if (!seleccionado) {
+                document.getElementById('mensajeSeleccion').innerHTML = 
+                    '<div class="alert alert-warning">Por favor selecciona un archivo.</div>';
+                return;
+            }
+
+            console.log('Aplicando archivo:', seleccionado.value);
+
+            try {
+                const response = await fetch('/vistas/aplicar-productos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ archivo: seleccionado.value })
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+
+                const result = await response.json();
+                console.log('Response data:', result);
+
+                if (result.success) {
+                    document.getElementById('mensajeSeleccion').innerHTML = 
+                        `<div class="alert alert-success">${result.mensaje || 'Archivo aplicado exitosamente como products.json'}</div>`;
+                } else {
+                    document.getElementById('mensajeSeleccion').innerHTML = 
+                        `<div class="alert alert-danger">${result.error || 'Error al aplicar el archivo'}</div>`;
+                }
+            } catch (error) {
+                console.error('Error al aplicar archivo:', error);
+                document.getElementById('mensajeSeleccion').innerHTML = 
+                    '<div class="alert alert-danger">Error al aplicar el archivo seleccionado.</div>';
+            }
+        }
+
+        // Event listener para el formulario de upload original
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/vistas/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('mensaje').innerHTML = 
+                        `<div class="alert alert-success">${result.mensaje || 'Archivo subido exitosamente.'}</div>`;
+                    e.target.reset();
+                    // Recargar la lista de archivos después de subir uno nuevo
+                    cargarArchivos();
+                } else {
+                    document.getElementById('mensaje').innerHTML = 
+                        `<div class="alert alert-danger">${result.error || 'Error al subir archivo.'}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('mensaje').innerHTML = 
+                    `<div class="alert alert-danger">Error al subir archivo</div>`;
+            }
+        });
+
+        // Event listener para aplicar archivo seleccionado
+        document.getElementById('aplicarSeleccion').addEventListener('click', aplicarArchivoSeleccionado);
+
+        // Cargar archivos al cargar la página
+        document.addEventListener('DOMContentLoaded', cargarArchivos);
+    </script>

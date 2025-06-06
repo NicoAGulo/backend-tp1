@@ -81,4 +81,45 @@ router.get('/multer', async (req, res) => {
     res.render('partials/multer', {archivos});
 });
 
+router.post('/aplicar-productos', async (req, res) => {
+    try {
+        const { archivo } = req.body;
+        
+        console.log('Archivo recibido:', archivo);
+        
+        if (!archivo) {
+            return res.json({ success: false, error: 'No se especificó archivo' });
+        }
+
+        const fs = await import('fs/promises');
+        
+        // Usar rutas absolutas basadas en process.cwd()
+        const sourcePath = path.join(process.cwd(), 'uploads', archivo);
+        const destPath = path.join(process.cwd(), 'src/products.json');
+        
+        console.log('Source path:', sourcePath);
+        console.log('Dest path:', destPath);
+        
+        // Verificar que el archivo existe
+        await fs.access(sourcePath);
+        
+        // Copiar el archivo
+        await fs.copyFile(sourcePath, destPath);
+        
+        console.log('Archivo copiado exitosamente');
+        
+        res.json({ 
+            success: true, 
+            mensaje: `Archivo ${archivo} aplicado como products.json exitosamente` 
+        });
+        
+    } catch (error) {
+        console.error('Error al aplicar archivo:', error);
+        res.json({ 
+            success: false, 
+            error: `Error al aplicar el archivo: ${error.message}` 
+        });
+    }
+});
+
 export {router, cartManager, productManager};
